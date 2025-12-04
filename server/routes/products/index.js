@@ -18,5 +18,7 @@ router.use('/', require('./imports'));
 // Keep delete endpoints as subpaths to preserve existing URLs
 router.use('/delete', require('../deleteProduct'));
 router.use('/delete-from-warehouse', require('../deleteFromWarehouse'));
+// Also support RESTful DELETE /api/products/:id
+router.use('/', require('./deleteById'));
 
 module.exports = router;

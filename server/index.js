@@ -6,6 +6,7 @@ const fs = require('fs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
+const logger = require('./lib/logger');
 
 dotenv.config();
 
@@ -139,7 +140,7 @@ try {
     // client build not found - skip static mount
   }
 } catch (err) {
-  console.error('[SERVER] error while mounting static build', err);
+  logger.error('[SERVER] error while mounting static build', err);
 }
 
 const { PrismaClient } = require('@prisma/client');
@@ -178,7 +179,7 @@ async function ensureSeedData() {
       }
     }
   } catch (err) {
-    console.error('[SERVER] error ensuring seed data', err);
+    logger.error('[SERVER] error ensuring seed data', err);
   }
 }
 
@@ -186,6 +187,6 @@ async function ensureSeedData() {
 (async () => {
   await ensureSeedData();
     const server = app.listen(PORT, () => {
-    console.warn(`Server listening on port ${PORT}`);
+    logger.info(`Server listening on port ${PORT}`);
   });
 })();

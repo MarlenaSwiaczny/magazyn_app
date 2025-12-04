@@ -124,10 +124,10 @@ export default function ProductView({ user, onBack, setView }) {
     if (!deleteTarget) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`${BASE || ''}/api/products/delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ productId: deleteTarget.id })
+      const url = `${BASE || ''}/api/products/${deleteTarget.id}`;
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
       });
       const text = await res.text().catch(() => '');
       let json = null;
