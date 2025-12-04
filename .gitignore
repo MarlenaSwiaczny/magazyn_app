@@ -1,0 +1,59 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/client/node_modules
+/server/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore any _deprecated folders used for snapshots/backups
+_deprecated/
+**/_deprecated/
+
+# client build output and Vite/CRA caches
+client/build/
+client/.cache/
+
+# server generated artifacts (Prisma client, query engine, etc.)
+server/generated/
+
+# public/ build artifacts
+public/
+
+# logs and runtime files
+logs/
+server/logs/
+*.log
+
+# Editor/IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Environment and secrets
+.env
+.env.*
+
+# Thumbnails / uploads
+public/uploads/
+
