@@ -14,7 +14,7 @@ export async function addProduct(payload) {
     
     return { ok: res.ok, status: res.status, body };
   } catch (e) {
-    // eslint-disable-next-line no-console
+     
     console.error('[productNew/api] addProduct error', e);
     throw e;
   }
@@ -29,7 +29,7 @@ export async function updateProduct(id, payload) {
     
     return { ok: res.ok, status: res.status, body };
   } catch (e) {
-    // eslint-disable-next-line no-console
+     
     console.error('[productNew/api] updateProduct error', e);
     throw e;
   }

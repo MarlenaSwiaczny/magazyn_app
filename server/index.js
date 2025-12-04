@@ -153,13 +153,13 @@ async function ensureSeedData() {
   try {
     const warehouseCount = await prisma.warehouse.count();
     if (warehouseCount === 0) {
-      console.log('[SERVER] no warehouses found - creating default warehouses');
+      console.warn('[SERVER] no warehouses found - creating default warehouses');
       await prisma.warehouse.createMany({ data: [ { name: 'GŁÓWNY' }, { name: 'OUTLET' } ] });
     }
 
     const productCount = await prisma.product.count();
     if (productCount === 0) {
-      console.log('[SERVER] no products found - creating default product types as placeholder products');
+      console.warn('[SERVER] no products found - creating default product types as placeholder products');
       // Create simple placeholder products that expose the desired types in the UI.
       const defaultTypes = ['Klimatyzacja', 'Serwis', 'Wentylacja'];
       // Use a small descriptive name so admins can easily find and remove them later.
@@ -185,7 +185,7 @@ async function ensureSeedData() {
 // Start server after ensuring seed data
 (async () => {
   await ensureSeedData();
-  const server = app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    const server = app.listen(PORT, () => {
+    console.warn(`Server listening on port ${PORT}`);
   });
 })();

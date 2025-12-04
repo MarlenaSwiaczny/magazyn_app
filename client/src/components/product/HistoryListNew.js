@@ -34,7 +34,7 @@ export default function HistoryList({ productId }) {
           try {
             const auth = getAuthHeaders();
             if (!auth.Authorization && attempt < maxAttempts) {
-              // eslint-disable-next-line no-await-in-loop
+               
               await sleep(200 * attempt);
               continue;
             }
@@ -47,11 +47,11 @@ export default function HistoryList({ productId }) {
           break;
         } catch (err) {
           if (attempt < maxAttempts) {
-            // eslint-disable-next-line no-await-in-loop
+             
             await sleep(200 * attempt);
             continue;
           }
-          // eslint-disable-next-line no-console
+           
           console.warn('[HistoryList] getProductLastHistory failed after attempts', err && err.message ? err.message : err);
           if (!mounted) return;
           setRows([]);
@@ -77,7 +77,7 @@ export default function HistoryList({ productId }) {
       setRows(h);
       setExpanded(true);
     } catch (err) {
-      // eslint-disable-next-line no-console
+       
       console.error('[HistoryList] loadFull error', err && err.message ? err.message : err);
     } finally {
       setLoading(false);

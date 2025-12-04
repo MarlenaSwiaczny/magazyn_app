@@ -265,7 +265,7 @@ export default function ProductForm({
                     if (!r.ok) {
                       let bodyText = '';
                       try { bodyText = await r.text(); } catch (_) {}
-                      // eslint-disable-next-line no-console
+                       
                       console.error('[ProductForm] upload failed body:', bodyText);
                       throw new Error('Upload failed: ' + (bodyText || r.statusText));
                     }
@@ -329,7 +329,7 @@ export default function ProductForm({
                       }
                     })();
                   } catch (err) {
-                // eslint-disable-next-line no-console
+                 
                 console.error('[ProductForm] upload error', err);
                 setUploadError("Błąd przesyłania zdjęcia: " + err.message);
                     return;
@@ -417,7 +417,7 @@ export default function ProductForm({
                   }
                 } catch (e) {
                   // network or API error during pre-check: log and continue to submit (server will validate)
-                  // eslint-disable-next-line no-console
+                   
                   console.warn('Pre-submit uniqueness check failed, proceeding to submit:', e);
                 }
 
@@ -433,7 +433,7 @@ export default function ProductForm({
                     if (!r.ok) {
                       let bodyText = '';
                       try { bodyText = await r.text(); } catch (_) {}
-                      // eslint-disable-next-line no-console
+                       
                       console.error('[ProductForm] upload failed body (add):', bodyText);
                       throw new Error('Upload failed: ' + (bodyText || r.statusText));
                     }
@@ -469,7 +469,7 @@ export default function ProductForm({
                       }
                     })();
                   } catch (err) {
-                // eslint-disable-next-line no-console
+                 
                 console.error('[ProductForm] upload error (add)', err);
                 setUploadError("Błąd przesyłania zdjęcia: " + err.message);
                     return;

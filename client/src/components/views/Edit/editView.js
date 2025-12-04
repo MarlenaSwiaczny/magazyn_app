@@ -64,7 +64,7 @@ export default function EditView({ onBack, onRefresh, userId, onImportExcel, use
       finally { try { clearPendingEdit(); } catch (_) {} }
     };
     openFor();
-  }, [pendingEditId, pendingEditItem]);
+  }, [pendingEditId, pendingEditItem, clearPendingEdit, products]);
 
   useEffect(() => { const v = (form.Rozmiar || '').trim().toLowerCase(); if (v.length >= 1) setSizeSuggestions(sizes.filter(s => s.toLowerCase().startsWith(v))); else setSizeSuggestions([]); }, [form.Rozmiar, sizes]);
 

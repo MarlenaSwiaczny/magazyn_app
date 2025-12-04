@@ -47,7 +47,7 @@ export default function EditView({ onBack, onRefresh, userId, onImportExcel, use
   useEffect(() => {
     fetchProducts();
     getWarehouses().then(ws => setWarehouses(ws)).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Aggregate rows into unique product entries (shared helper)

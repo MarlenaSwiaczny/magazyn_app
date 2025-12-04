@@ -10,6 +10,10 @@ module.exports = [
       'client/node_modules/**',
       'server/node_modules/**',
       'server/generated/**',
+      'server/_deprecated/**',
+      'client/_deprecated_backups/**',
+      'client/src/components/_deprecated/**',
+      'client/magazyn-app/**',
       'build/**',
       'public/**',
       '.cache/**'
@@ -22,9 +26,24 @@ module.exports = [
   },
   {
     files: ['**/*.js', '**/*.jsx'],
+    // load plugins so rules like react-hooks/exhaustive-deps are available
+    plugins: {
+      react: require('eslint-plugin-react'),
+      'react-hooks': require('eslint-plugin-react-hooks')
+    },
     rules: {
       // warn on console usage except console.error / console.warn
-      'no-console': ['warn', { allow: ['error', 'warn'] }]
+      'no-console': ['warn', { allow: ['error', 'warn'] }],
+      // react hooks rule to catch missing deps
+      'react-hooks/exhaustive-deps': 'warn'
+    }
+  }
+  ,
+  // allow console.* in scripts and tools (CLI helpers)
+  {
+    files: ['server/scripts/**', 'scripts/**', 'client/tools/**'],
+    rules: {
+      'no-console': 'off'
     }
   }
 ];

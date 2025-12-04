@@ -35,7 +35,7 @@ export default function HistoryList({ productId }) {
             const authPresent = !!auth.Authorization;
             if (!authPresent && attempt < maxAttempts) {
                 // wait a bit for token to appear (backoff)
-                // eslint-disable-next-line no-await-in-loop
+                 
                 await sleep(200 * attempt);
                 continue; // retry
               }
@@ -49,7 +49,7 @@ export default function HistoryList({ productId }) {
           break;
           } catch (err) {
           if (attempt < maxAttempts) {
-            // eslint-disable-next-line no-await-in-loop
+             
             await sleep(200 * attempt);
             continue;
           }
@@ -79,7 +79,7 @@ export default function HistoryList({ productId }) {
       setRows(h);
       setExpanded(true);
     } catch (err) {
-      // eslint-disable-next-line no-console
+       
       console.error('[HistoryList] loadFull error', err && err.message ? err.message : err);
     } finally {
       setLoading(false);

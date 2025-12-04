@@ -36,7 +36,7 @@ export default function ProductDetailsModal({ product, open = false, onClose = (
         }));
         setStockRows(normalized);
       } catch (err) {
-        // eslint-disable-next-line no-console
+         
         console.error('[ProductDetailsModal] fetchStocks error', err.message || err);
         setStockRows([]);
       } finally {

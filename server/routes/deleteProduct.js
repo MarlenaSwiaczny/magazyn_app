@@ -37,7 +37,7 @@ router.post('/', authMiddleware, async (req, res) => {
       await tx.product.delete({ where: { id } });
     });
 
-    console.log('[API DELETE PRODUCT] deleted product', id, 'stocksRemoved=', stocks.length, 'byUser=', userId);
+    console.warn('[API DELETE PRODUCT] deleted product', id, 'stocksRemoved=', stocks.length, 'byUser=', userId);
     return res.json({ success: true, removedStocks: stocks.length });
   } catch (err) {
     console.error('[API DELETE PRODUCT] Error deleting product', id, err && err.message);
