@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { BASE, getAuthHeaders } from './services/api';
 import LoginForm from "./components/forms/loginForm";
 import RegisterForm from "./components/forms/registerForm";
@@ -96,19 +96,7 @@ function App() {
     clearSession(true);
   };
 
-  // ---- Render ----
-  // If user opened a client route directly (e.g. /app/...), ensure we show main view when session exists
-  useEffect(() => {
-    if (!restoring && location && location.pathname && location.pathname.startsWith('/app')) {
-      const storedId = localStorage.getItem('userId');
-      if (storedId) {
-        setUserId(storedId);
-        setView('main');
-      } else {
-        try { navigate('/login', { replace: true }); } catch (e) {}
-      }
-    }
-  }, [restoring, location && location.pathname]);
+  // ---- Render (route-based) ----
   if (restoring) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -141,35 +129,16 @@ function App() {
     );
   }
 
-  // ---- Guaranteed fallbacks (prevent white screen forever) ----
-  if (view === "main" && !userId) {
-    clearSession(true);
-    return null;
-  }
-
-  // ---- Normal flow ----
   return (
-    <>
-      {view === "login" && (
-        <LoginForm
-          onLogin={handleLogin}
-          onSwitchToRegister={() => { setView("register"); navigate('/register'); }}
-        />
-      )}
+    <Routes>
+      <Route path="/login" element={<LoginForm onLogin={handleLogin} onSwitchToRegister={() => { navigate('/register'); }} />} />
+      <Route path="/register" element={<RegisterForm onRegister={handleLogin} onSwitchToLogin={() => { navigate('/login'); }} />} />
 
-      {view === "register" && (
-        <RegisterForm
-          onRegister={handleLogin}
-          onSwitchToLogin={() => { setView("login"); navigate('/login'); }}
-        />
-      )}
+      <Route path="/app/*" element={userId ? <ErrorBoundary><MainApp userId={userId} onLogout={handleLogout} /></ErrorBoundary> : <Navigate to="/login" replace />} />
 
-      {view === "main" && (
-        <ErrorBoundary>
-          <MainApp userId={userId} onLogout={handleLogout} />
-        </ErrorBoundary>
-      )}
-    </>
+      <Route path="/" element={userId ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
