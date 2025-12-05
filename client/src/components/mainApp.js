@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import EditView from "./views/editView";
 import { ToastProvider } from './common/ToastContext';
 import Toast from './common/Toast';
@@ -16,7 +17,10 @@ import { BASE, getAuthHeaders, getWarehouses, getProductsDb } from "../services/
 import WarehouseView from "./views/warehouseView";
 
 export default function MainApp({ userId: propUserId = null, onLogout } = {}) {
-  const [view, setView] = useState("actionView"); // default to action view
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [view, setViewState] = useState("actionView"); // internal view state (kept for compatibility)
   const [warehouses, setWarehouses] = useState([]);
   const [currentWarehouseId, setCurrentWarehouseId] = useState(null);
   const [tempWarehouse, setTempWarehouse] = useState(null); // temporary selection from WarehouseView
@@ -37,11 +41,43 @@ export default function MainApp({ userId: propUserId = null, onLogout } = {}) {
   };
 
   // Wrapper for changing view: clear temp selections and refresh full product list
+  const viewToPath = (v) => {
+    switch (v) {
+      case 'actionView': return '/app/action';
+      case 'productView': return '/app/products';
+      case 'productNew': return '/app/products/new';
+      case 'edit': return '/app/edit';
+      case 'import': return '/app/import';
+      case 'profile': return '/app/profile';
+      case 'archive': return '/app/archive';
+      case 'warehouses': return '/app/warehouses';
+      case 'typesView': return '/app/types';
+      case 'adminPanel': return '/app/admin';
+      case 'userActions': return '/app/user-actions';
+      default: return '/app/products';
+    }
+  };
+
+  const pathToView = (path) => {
+    if (!path) return 'actionView';
+    if (path.startsWith('/app/action')) return 'actionView';
+    if (path.startsWith('/app/products')) return 'productView';
+    if (path.startsWith('/app/import')) return 'import';
+    if (path.startsWith('/app/profile')) return 'profile';
+    if (path.startsWith('/app/archive')) return 'archive';
+    if (path.startsWith('/app/warehouses')) return 'warehouses';
+    if (path.startsWith('/app/types')) return 'typesView';
+    if (path.startsWith('/app/admin')) return 'adminPanel';
+    if (path.startsWith('/app/user-actions')) return 'userActions';
+    if (path.startsWith('/app/edit')) return 'edit';
+    return 'productView';
+  };
+
   const handleSetView = (v) => {
-    // clear temporary warehouse selection so child views start fresh
     if (tempWarehouse) setTempWarehouse(null);
-    setView(v);
-    // ensure products list is refreshed to default/current warehouse
+    setViewState(v);
+    const p = viewToPath(v);
+    try { navigate(p); } catch (e) {}
     refreshProducts();
   };
 
@@ -107,6 +143,12 @@ export default function MainApp({ userId: propUserId = null, onLogout } = {}) {
   useEffect(() => {
     refreshProducts();
   }, [view, refreshProducts]);
+
+  // sync view with URL on location change
+  useEffect(() => {
+    const current = pathToView(location.pathname);
+    if (current !== view) setViewState(current);
+  }, [location.pathname]);
 
   // Listen for global edit requests coming from nested components (e.g., ProductDetailsModal)
   // Global requests now open the new product edit view (`productNew`) so editing flows land there.
@@ -221,78 +263,22 @@ export default function MainApp({ userId: propUserId = null, onLogout } = {}) {
         {/* ToastProvider imported lazily to avoid circular imports */}
   <Header view={view} setView={handleSetView} user={user} onLogout={handleLogout} selectedWarehouseName={selectedWarehouseName} onOpenSearchWithWarehouse={openSearchWithWarehouse} />
         <div className="p-4">
-          {view === "profile" && user && (
-            <ProfileView
-              user={user}
-              onUpdate={updatedUser => setUser(updatedUser)}
-              onChangePassword={() => alert("Zmiana hasła - do zaimplementowania")}
-            />
-          )}
-          {view === "archive" && userId && (
-            <ArchiveView user={user} userId={userId} />
-          )}
-          {view === "warehouses" && (
-            <WarehouseView onBack={() => handleSetView('productView')} onSelectWarehouse={handleSelectWarehouse} />
-          )}
-          {view === "login" && null}
-
-          {view === "edit" && user && (user.role === "admin" || user.role === "editor") && (
-            <EditView
-              products={products}
-              onBack={() => handleSetView("productView")}
-              onRefresh={refreshProducts}
-              pendingEditId={pendingEditId}
-              pendingEditItem={pendingEditItem}
-              clearPendingEdit={() => { setPendingEditId(null); setPendingEditItem(null); }}
-              userId={userId}
-              user={user}
-              onImportExcel={() => setView("import")}
-            />
-          )}
-
-          {view === "import" && (
-            <ImportExcelView
-              onBack={() => handleSetView("productNew")}
-              onRefresh={refreshProducts}
-            />
-          )}
-
+          <Routes>
+            <Route path="/app/profile" element={user ? <ProfileView user={user} onUpdate={updatedUser => setUser(updatedUser)} onChangePassword={() => alert('Zmiana hasła - do zaimplementowania')} /> : null} />
+            <Route path="/app/archive" element={userId ? <ArchiveView user={user} userId={userId} /> : null} />
+            <Route path="/app/warehouses" element={<WarehouseView onBack={() => handleSetView('productView')} onSelectWarehouse={handleSelectWarehouse} />} />
+            <Route path="/app/edit" element={(user && (user.role === 'admin' || user.role === 'editor')) ? <EditView products={products} onBack={() => handleSetView('productView')} onRefresh={refreshProducts} pendingEditId={pendingEditId} pendingEditItem={pendingEditItem} clearPendingEdit={() => { setPendingEditId(null); setPendingEditItem(null); }} userId={userId} user={user} onImportExcel={() => handleSetView('import')} /> : null} />
+            <Route path="/app/import" element={<ImportExcelView onBack={() => handleSetView('productNew')} onRefresh={refreshProducts} />} />
+            <Route path="/app/action" element={<ActionView onBack={() => handleSetView('productView')} user={user} setView={handleSetView} initialFilterWarehouse={pendingSearchWarehouse} />} />
+            <Route path="/app/products/new" element={<ProductNewView user={user} setView={handleSetView} pendingEditId={pendingEditId} pendingEditItem={pendingEditItem} clearPendingEdit={() => { setPendingEditId(null); setPendingEditItem(null); }} />} />
+            <Route path="/app/products/*" element={<ProductView user={user} setView={handleSetView} />} />
+            <Route path="/app/types" element={<TypesView setView={handleSetView} />} />
+            <Route path="/app/admin" element={user && user.role === 'admin' ? <AdminPanel currentUser={user} /> : null} />
+            <Route path="/app/user-actions" element={user && (user.role === 'admin' || user.role === 'editor') ? <UserActionsView /> : null} />
+            <Route path="/app" element={<ActionView onBack={() => handleSetView('productView')} user={user} setView={handleSetView} initialFilterWarehouse={pendingSearchWarehouse} />} />
+          </Routes>
           {/* Clear temporary selection whenever we're not in the former use view; keep behavior */}
           {tempWarehouse && (setTempWarehouse(null))}
-
-          {/* modern view removed: the import and rendering were deleted to fix build */}
-
-          {view === "actionView" && (
-            <ActionView
-              onBack={() => handleSetView('productView')}
-              user={user}
-              setView={handleSetView}
-              initialFilterWarehouse={pendingSearchWarehouse}
-            />
-          )}
-
-          {view === 'productView' && (
-            <ProductView user={user} setView={handleSetView} />
-          )}
-          {view === 'productNew' && (
-            <ProductNewView
-              user={user}
-              setView={handleSetView}
-              pendingEditId={pendingEditId}
-              pendingEditItem={pendingEditItem}
-              clearPendingEdit={() => { setPendingEditId(null); setPendingEditItem(null); }}
-            />
-          )}
-          {view === 'typesView' && (
-            <TypesView setView={handleSetView} />
-          )}
-
-          {view === "adminPanel" && user && user.role === "admin" && (
-            <AdminPanel currentUser={user} />
-          )}
-          {view === "userActions" && user && (user.role === "admin" || user.role === "editor") && (
-            <UserActionsView />
-          )}
         </div>
         <Toast />
       </div>

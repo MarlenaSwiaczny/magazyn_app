@@ -3,6 +3,7 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const { authMiddleware, requireRole } = require('../middleware/auth');
 const prisma = new PrismaClient();
+// fs/path were used by the cleanup endpoint; removed when cleanup moved to delete-by-id
 
 // Protect all admin routes: require authenticated admin user
 router.use(authMiddleware, requireRole('admin'));

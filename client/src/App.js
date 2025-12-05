@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from 'react-router-dom';
 import { BASE, getAuthHeaders } from './services/api';
 import LoginForm from "./components/forms/loginForm";
 import RegisterForm from "./components/forms/registerForm";
@@ -11,6 +12,8 @@ function App() {
   const [view, setView] = useState("login");
   const [restoring, setRestoring] = useState(true);
   const [sessionError, setSessionError] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // ---- Restore session from storage safely ----
   useEffect(() => {
@@ -85,6 +88,8 @@ function App() {
     } catch (e) {}
     setUserId(id);
     setView("main");
+    // navigate to main products view
+    try { navigate('/app/products', { replace: true }); } catch (e) {}
   };
 
   const handleLogout = () => {
@@ -92,6 +97,18 @@ function App() {
   };
 
   // ---- Render ----
+  // If user opened a client route directly (e.g. /app/...), ensure we show main view when session exists
+  useEffect(() => {
+    if (!restoring && location && location.pathname && location.pathname.startsWith('/app')) {
+      const storedId = localStorage.getItem('userId');
+      if (storedId) {
+        setUserId(storedId);
+        setView('main');
+      } else {
+        try { navigate('/login', { replace: true }); } catch (e) {}
+      }
+    }
+  }, [restoring, location && location.pathname]);
   if (restoring) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -136,14 +153,14 @@ function App() {
       {view === "login" && (
         <LoginForm
           onLogin={handleLogin}
-          onSwitchToRegister={() => setView("register")}
+          onSwitchToRegister={() => { setView("register"); navigate('/register'); }}
         />
       )}
 
       {view === "register" && (
         <RegisterForm
           onRegister={handleLogin}
-          onSwitchToLogin={() => setView("login")}
+          onSwitchToLogin={() => { setView("login"); navigate('/login'); }}
         />
       )}
 
