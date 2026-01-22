@@ -93,7 +93,13 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (imageUrl !== undefined) productUpdate.imageUrl = imageUrl;
     if (imageThumb !== undefined) productUpdate.imageThumb = imageThumb;
     // if imageUrl provided but no imageThumb specified, clear thumbnail so UI can refresh
-    if (imageUrl !== undefined && imageThumb === undefined) productUpdate.imageThumb = null;
+    // Previously we cleared the thumbnail when `imageUrl` was provided but
+    // `imageThumb` wasn't present. That causes race conditions when the
+    // client uploads a thumbnail first and later uploads the full image —
+    // the server would null the thumbnail before the client had a chance
+    // to include it in the update. Keep existing thumbnail unless the
+    // client explicitly sends `imageThumb` (including `null`).
+    // if (imageUrl !== undefined && imageThumb === undefined) productUpdate.imageThumb = null;
 
     // If client provided `stocks` array, replace all stock rows for this product with the provided list
     const incomingStocks = Array.isArray(req.body.stocks) ? req.body.stocks : null;
