@@ -46,6 +46,7 @@ function App() {
         if (data?.success) {
           setUserId(storedId);
           setView("main");
+          try { navigate('/app/products', { replace: true }); } catch (e) {}
         } else {
           clearSession();
         }
