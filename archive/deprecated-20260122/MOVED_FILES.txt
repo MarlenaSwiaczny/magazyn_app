@@ -1,0 +1,9 @@
+# Lista kandydatów do przeniesienia/archiwizacji
+
+
+# Katalogi i backupy
+
+# Uwaga: pliki wymienione powyżej nie zostały jeszcze przeniesione. Uruchom
+# `bash scripts/move-deprecated-to-archive.sh archive/deprecated-20260122`
+# aby wykonać przeniesienie (skrypt spróbuje użyć `git mv`, w przeciwnym
+# wypadku użyje `mv`).
