@@ -52,7 +52,9 @@ export function useProductImageUpload() {
       }
     })();
 
-    return thumbUrl;
+    // Return the full thumb response so callers can immediately include
+    // `url`/`thumbUrl` in payloads without waiting for React state updates.
+    return thumbResp;
   };
 
   return { uploadImageForAdd };
