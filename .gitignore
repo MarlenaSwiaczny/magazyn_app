@@ -70,3 +70,8 @@ server.pid
 server/server.pid
 
 
+
+# Build / generated
+client/build/
+server/generated/
+prisma/*.backup
