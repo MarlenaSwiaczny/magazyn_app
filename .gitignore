@@ -33,6 +33,7 @@ Thumbs.db
 # Environment and secrets
 .env
 .env.*
+!/.env.example
 
 # Logs
 logs/
@@ -91,3 +92,7 @@ prisma/*.backup
 client/build/
 server/generated/
 prisma/*.backup
+
+# Ignore local env files for client and server
+client/.env
+server/.env
