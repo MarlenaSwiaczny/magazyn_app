@@ -10,6 +10,17 @@ const logger = require('./lib/logger');
 
 dotenv.config();
 
+// Fail fast: require JWT_SECRET in production to avoid insecure fallback
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  try {
+    logger.error('Missing required environment variable: JWT_SECRET. Aborting startup.');
+  } catch (e) {
+    // logger may not be available; fallback to console
+    console.error('Missing required environment variable: JWT_SECRET. Aborting startup.');
+  }
+  process.exit(1);
+}
+
 const app = express();
 
 // If the server is running behind a proxy (Cloudflare, nginx, etc.) and the
