@@ -154,15 +154,15 @@ async function ensureSeedData() {
   try {
     const warehouseCount = await prisma.warehouse.count();
     if (warehouseCount === 0) {
-      console.warn('[SERVER] no warehouses found - creating default warehouses');
-      await prisma.warehouse.createMany({ data: [ { name: 'GŁÓWNY' }, { name: 'OUTLET' } ] });
+      logger.warn('[SERVER] no warehouses found - creating default warehouse Magazyn główny');
+      await prisma.warehouse.createMany({ data: [ { name: 'Magazyn główny' } ] });
     }
 
     const productCount = await prisma.product.count();
     if (productCount === 0) {
-      console.warn('[SERVER] no products found - creating default product types as placeholder products');
+      logger.warn('[SERVER] no products found - creating default product types as placeholder products');
       // Create simple placeholder products that expose the desired types in the UI.
-      const defaultTypes = ['Klimatyzacja', 'Serwis', 'Wentylacja'];
+      const defaultTypes = ['Meble'];
       // Use a small descriptive name so admins can easily find and remove them later.
       const created = [];
       for (const t of defaultTypes) {
@@ -185,8 +185,16 @@ async function ensureSeedData() {
 
 // Start server after ensuring seed data
 (async () => {
-  await ensureSeedData();
-    const server = app.listen(PORT, () => {
+  // In production we avoid automatically creating seed data unless
+  // explicitly enabled via ENABLE_SEED=true. This prevents accidental
+  // writes to a live database during deploys.
+  if (process.env.NODE_ENV === 'production' && process.env.ENABLE_SEED !== 'true') {
+    logger.info('[SERVER] production mode: skipping seed data (set ENABLE_SEED=true to enable)');
+  } else {
+    await ensureSeedData();
+  }
+
+  const server = app.listen(PORT, () => {
     logger.info(`Server listening on port ${PORT}`);
   });
 })();
