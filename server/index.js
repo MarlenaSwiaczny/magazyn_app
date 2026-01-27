@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const logger = require('./lib/logger');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 dotenv.config();
 
@@ -118,6 +120,8 @@ app.use("/api/types", require("./routes/types"));
 // the legacy handler mounted inside the uploads aggregator).
 app.use("/api/upload", require("./routes/uploads"));
 app.use("/api/stock", require("./routes/updateStock"));
+// Serve API docs (OpenAPI/Swagger UI). Accessible at /api/docs
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Serve uploads and set permissive cross-origin headers so images can be
 // embedded/loaded from the public frontend (or proxied host). We set
 // Access-Control-Allow-Origin and Cross-Origin-Resource-Policy here only for
