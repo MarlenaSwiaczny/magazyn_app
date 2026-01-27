@@ -209,3 +209,15 @@ async function ensureSeedData() {
     logger.info(`Server listening on port ${PORT}`);
   });
 })();
+
+// Health endpoint for monitoring / readiness checks
+app.get('/health', async (_req, res) => {
+  try {
+    // quick DB check
+    await prisma.$queryRaw`SELECT 1`;
+    return res.json({ ok: true, db: true, time: Date.now() });
+  } catch (err) {
+    logger.error('[HEALTH] DB check failed', err && err.message ? err.message : err);
+    return res.status(503).json({ ok: false, db: false, error: String(err) });
+  }
+});
