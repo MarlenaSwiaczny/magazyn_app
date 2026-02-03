@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import ProductDetails from './ProductDetails';
-import { createThumbnail, createResizedImage } from '../../utils/imageUtils';
-import ConfirmButton from "../common/ConfirmButton";
-import QtyStepper from '../common/QtyStepper';
 import styles from './product-form.module.css';
-import { BASE, getProductsDb } from '../../services/api';
-import { DeleteButton, CancelButton } from '../buttons/button';
 import StockRowsEditor from './StockRowsEditor';
 import ProductActions from './ProductActions';
 import useProductHandlers from '../../hooks/useProductHandlers';
@@ -49,7 +44,9 @@ export default function ProductForm({
         imageUrl: form.imageUrl || imageUrl || null
       });
       // Initialize local image preview with existing image URL so user sees current photo
-      setImage(form.imageUrl || imageUrl || null);
+      const initialImage = form.imageUrl || imageUrl || null;
+      console.warn('[ProductForm] init edit - image props', { formImage: form.imageUrl, imageUrl, initialImage });
+      setImage(initialImage);
     } else {
       setOriginalForm(null);
       setImage(null);
@@ -106,7 +103,7 @@ export default function ProductForm({
   const isSizeFilled = Boolean(form.Rozmiar && form.Rozmiar.trim());
 
   // For add/edit require at least one stock row with positive quantity
-  const hasValidStocks = Array.isArray(stockRows) && stockRows.some(r => Number(r.quantity) > 0);
+  // (stock validation is handled in parent when needed)
 
   // Add: button enabled only if required fields (name/size/type) are filled.
   // Stocks are optional when creating a product — if present they will be sent in payload.

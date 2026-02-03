@@ -19,13 +19,13 @@ module.exports = {
   debug: (...args) => {
     if (!shouldLog('debug')) return;
     try {
-      console.log('[DEBUG]', formatArgs(args));
+      console.warn('[DEBUG]', formatArgs(args));
     } catch (e) {}
   },
   info: (...args) => {
     if (!shouldLog('info')) return;
     try {
-      console.log('[INFO]', formatArgs(args));
+      console.warn('[INFO]', formatArgs(args));
     } catch (e) {}
   },
   warn: (...args) => {

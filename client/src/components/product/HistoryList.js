@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getProductHistory, getProductLastHistory, getAuthHeaders } from '../../services/api';
 
-export default function HistoryList({ productId }) {
+export default function HistoryList({ productId, token = null }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -31,7 +31,7 @@ export default function HistoryList({ productId }) {
 
           // No rows returned. If there's no auth token, allow retry; otherwise stop and show button.
           try {
-            const auth = getAuthHeaders();
+            const auth = getAuthHeaders(token);
             const authPresent = !!auth.Authorization;
             if (!authPresent && attempt < maxAttempts) {
                 // wait a bit for token to appear (backoff)
@@ -66,7 +66,7 @@ export default function HistoryList({ productId }) {
 
     fetchLatest();
     return () => { mounted = false; };
-  }, [productId]);
+  }, [productId, token]);
 
   const loadFull = async () => {
     if (!productId) return;

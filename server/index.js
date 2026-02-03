@@ -7,8 +7,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const logger = require('./lib/logger');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./swagger');
 
 dotenv.config();
 
@@ -17,8 +15,8 @@ if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
   try {
     logger.error('Missing required environment variable: JWT_SECRET. Aborting startup.');
   } catch (e) {
-    // logger may not be available; fallback to console
-    console.error('Missing required environment variable: JWT_SECRET. Aborting startup.');
+    // logger may not be available; fallback to stderr
+    try { process.stderr.write('Missing required environment variable: JWT_SECRET. Aborting startup.\n'); } catch (e2) {}
   }
   process.exit(1);
 }
@@ -83,7 +81,7 @@ app.use(cookieParser());
 // Log incoming API requests to help diagnose routing/forwarding issues
 app.use('/api', (req, _res, next) => {
   try {
-    // incoming API logging removed to reduce console noise
+    // request logging placeholder
   } catch (e) {
     // ignore logging errors
   }
@@ -100,11 +98,7 @@ const authLimiter = rateLimit({
 
 app.use("/api/auth", authLimiter, require("./routes/authUser"));
 app.use("/api/products-db", require("./routes/productsDb"));
-// Mount a single grouped router for product-related endpoints. The
-// new router re-exports the legacy route modules to preserve existing
-// endpoint paths (eg. /api/products/add, /api/products/import, etc.).
-// Prefer the grouped products router (folder index) so import-related
-// sub-routers (importRow, importProducts, etc.) are mounted too.
+// Product-related endpoints (grouped router)
 app.use("/api/products", require("./routes/products/index.js"));
 app.use("/api/warehouses", require("./routes/warehouses"));
 app.use("/api/products/delete-from-warehouse", require("./routes/deleteFromWarehouse"));
@@ -116,12 +110,10 @@ app.use("/api/use", require("./routes/use"));
 app.use("/api/archive", require("./routes/archive"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/types", require("./routes/types"));
-// Consolidated uploads router (preserves POST /api/upload behaviour via
-// the legacy handler mounted inside the uploads aggregator).
+// Uploads router
 app.use("/api/upload", require("./routes/uploads"));
 app.use("/api/stock", require("./routes/updateStock"));
-// Serve API docs (OpenAPI/Swagger UI). Accessible at /api/docs
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// API docs UI not mounted
 // Serve uploads and set permissive cross-origin headers so images can be
 // embedded/loaded from the public frontend (or proxied host). We set
 // Access-Control-Allow-Origin and Cross-Origin-Resource-Policy here only for

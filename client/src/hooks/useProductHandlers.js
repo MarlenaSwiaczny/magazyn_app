@@ -13,7 +13,9 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
 
     // Client-side uniqueness check
     try {
-      const resp = await getProductsDb();
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_LIMIT = 100;
+      const resp = await getProductsDb(null, DEFAULT_PAGE, DEFAULT_LIMIT);
       const products = resp && resp.products ? resp.products : (Array.isArray(resp) ? resp : []);
       const norm = s => (s || '').toString().trim().toLowerCase();
       const exists = products.some(p => (norm(p.name) === norm(form.Nazwa) && norm(p.size) === norm(form.Rozmiar) && norm(p.type) === norm(form.Typ)));
@@ -22,7 +24,7 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
       }
     } catch (e) {
       // network or API error during pre-check: continue and let the server handle duplicates
-      // eslint-disable-next-line no-console
+       
       console.warn('Pre-submit uniqueness check failed, proceeding to submit:', e);
     }
 
@@ -39,7 +41,7 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
       }
     } catch (err) {
       // surface error to caller
-      // eslint-disable-next-line no-console
+       
       console.error('[useProductHandlers] upload error (add)', err);
       return { ok: false, error: err.message || String(err) };
     }
@@ -93,7 +95,7 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
       }
     } catch (err) {
       // surface upload error to caller
-      // eslint-disable-next-line no-console
+       
       console.error('[useProductHandlers] upload error (edit)', err);
       return { ok: false, error: err.message || String(err) };
     }
@@ -107,7 +109,7 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
     setForm({ Nazwa: '', Rozmiar: '', Typ: '' });
     setImage(null);
     return { ok: true };
-  }, [form, setForm, stockRows, setImage, onConfirmEdit]);
+  }, [form, setForm, stockRows, setImage, onConfirmEdit, image, uploadImageForAdd]);
 
   return { handleAdd, handleConfirmEdit };
 }

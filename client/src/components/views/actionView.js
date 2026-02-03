@@ -15,7 +15,7 @@ import VerticalAlignBottomOutlinedIcon from '@mui/icons-material/VerticalAlignBo
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 // actionView: simplified inventory-like view (visible to experimental user)
-export default function ActionView({ onBack, user, setView, initialFilterWarehouse = null }) {
+export default function ActionView({ onBack, user, setView, initialFilterWarehouse = null, token = null }) {
   const [warehouses, setWarehouses] = useState([]);
   const [productsDb, setProductsDb] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
     let mounted = true;
     (async () => {
       try {
-        const [ws, prodResp] = await Promise.all([getWarehouses(), getProductsDb()]);
+        const [ws, prodResp] = await Promise.all([getWarehouses(), getProductsDb(null, 1, itemsPerPage)]);
         if (!mounted) return;
         setWarehouses(ws || []);
         setProductsDb((prodResp && prodResp.products) || []);
@@ -147,7 +147,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
         return;
       }
 
-      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
+      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders(token) };
       const results = { success: 0, failed: 0, totalQuantity: 0, errors: [] };
 
       for (const stockKey of selectedIds) {
@@ -204,7 +204,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
 
       // Refresh products from server to reflect updated stocks
       try {
-        const prodResp = await getProductsDb();
+        const prodResp = await getProductsDb(null, 1, itemsPerPage);
         setProductsDb((prodResp && prodResp.products) || []);
       } catch (err) {
         console.error('[actionView] refresh products after transfer error', err);
@@ -234,7 +234,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
         return;
       }
 
-      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
+      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders(token) };
   const results = { success: 0, failed: 0, totalQuantity: 0, errors: [] };
 
       // execute sequentially to preserve server load ordering and easier failure handling
@@ -268,7 +268,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
 
       // Refresh products from server to reflect updated stocks
       try {
-        const prodResp = await getProductsDb();
+          const prodResp = await getProductsDb(null, 1, itemsPerPage);
         setProductsDb((prodResp && prodResp.products) || []);
       } catch (err) {
         console.error('[actionView] refresh products after use error', err);
@@ -369,7 +369,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
           </div>
         </div>
 
-        {/* transfer target select moved to the bottom MassActionBar; keep the pills only here */}
+        {/* Pills displayed here; transfer target select is in MassActionBar */}
       </div>
 
       {/* Product list placeholder (initially render list) */}
