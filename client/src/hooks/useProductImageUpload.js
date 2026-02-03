@@ -1,10 +1,9 @@
 import { createThumbnail, createResizedImage } from '../utils/imageUtils';
 import { BASE } from '../services/api';
 
-// Lightweight hook-style helper (not a React hook with state) that provides
-// an upload helper for product images. Keeps the same behavior as previous
-// inline code in ProductForm: upload thumb synchronously, start background
-// full-image upload and update setForm when it completes.
+// Lightweight helper for product image uploads.
+// Uploads thumbnail synchronously, starts background full-image upload,
+// and updates `setForm` when the full image upload completes.
 export function useProductImageUpload() {
   const uploadImageForAdd = async (image, setForm) => {
     if (!image) return null;
@@ -47,12 +46,14 @@ export function useProductImageUpload() {
         }
       } catch (bgErr) {
         // keep behavior minimal: log but do not throw
-        // eslint-disable-next-line no-console
+         
         console.warn('Background full-image upload failed', bgErr);
       }
     })();
 
-    return thumbUrl;
+    // Return the full thumb response so callers can immediately include
+    // `url`/`thumbUrl` in payloads without waiting for React state updates.
+    return thumbResp;
   };
 
   return { uploadImageForAdd };

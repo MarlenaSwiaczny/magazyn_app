@@ -1,70 +1,116 @@
-# Getting Started with Create React App
+# Magazyn App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Lekka aplikacja magazynowa (frontend React + backend Express + Prisma). README zawiera instrukcje uruchomienia, budowania i publikacji projektu.
 
-## Available Scripts
+## Zawartość repozytorium
+- `client/` — aplikacja React (frontend)
+- `server/` — serwer Express, Prisma i skrypty serwera
+- `server/prisma/` — schemat i migracje bazy danych
 
-In the project directory, you can run:
+## Wymagania
+- Node.js 18+ (zalecane LTS)
+- npm 8+ lub yarn
+- PostgreSQL (jeśli chcesz uruchomić serwer lokalnie z bazą)
 
-### `npm start`
+## Zmienne środowiskowe
+Utwórz plik `.env` w katalogu `server/` na bazie `server/.env.example` i — opcjonalnie — `.env` w katalogu głównym. Przykładowe klucze:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- `DATABASE_URL` — URL do Postgres (np. `postgresql://user:pass@localhost:5432/magazyn`)
+- `JWT_SECRET` — sekret do podpisywania tokenów
+- `PORT` — port serwera (domyślnie 5000)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Pliki przykładowe: `server/.env.example`, `.env.example` (root).
 
-### `npm test`
+## Uruchomienie w trybie developerskim
+1. Zainstaluj zależności root / client / server:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+cd client && npm install
+cd ../server && npm install
+```
 
-### `npm run build`
+2. Uruchom serwer (w katalogu `server/`):
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+cd server
+npm run dev
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Uruchom klienta (w katalogu `client/`):
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+cd client
+npm start
+```
 
-### `npm run eject`
+Frontend używa proxy `http://localhost:5000` do komunikacji z backendem w środowisku developerskim.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Budowanie aplikacji (production)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Zbuduj frontend:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```bash
+cd client
+npm run build
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+2. Pliki produkcyjne znajdą się w `client/build`. Możesz serwować je dowolnym serwerem lub skonfigurować serwer Express tak, aby serwował `client/build`.
 
-## Learn More
+## Migracje i baza danych (Prisma)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Instrukcje uruchamiania migracji i seedów (w katalogu `server`):
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Upewnij się, że w `server/.env` jest ustawiona zmienna `DATABASE_URL`.
 
-### Code Splitting
+- Instalacja/aktualizacja klienta Prisma:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+cd server
+npx prisma generate
+```
 
-### Analyzing the Bundle Size
+- Tryb developerski (lokalnie, tworzy migracje i stosuje je):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+npx prisma migrate dev --name init
+```
 
-### Making a Progressive Web App
+- Tryb produkcyjny (stosuj istniejące migracje bez ich tworzenia):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+npx prisma migrate deploy
+```
 
-### Advanced Configuration
+- Seed danych (jeśli projekt zawiera skrypt seed):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+# jeśli używasz Prisma seed (zdefiniowanego w prisma/seed.js lub package.json)
+npx prisma db seed
+# lub uruchom skrypt seeda ręcznie, np.:
+node prisma/seed.js
+```
 
-### Deployment
+Jeśli nie masz skryptu seed, możesz przygotować plik `server/prisma/seed.js` lub dodać polecenie `prisma db seed` w `package.json`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-### `npm run build` fails to minify
+## Linter / formatowanie
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+W root repo są skrypty:
+
+- `npm run lint` — uruchamia ESLint dla `server` i `client/src`
+- `npm run format` — uruchamia Prettier
+
+Uruchom w root:
+
+```bash
+npm run lint
+npm run format
+```
+
+## CI (GitHub Actions)
+W repo dodany jest prosty workflow CI (lint + client build). Zobacz `.github/workflows/ci.yml`.
+
+## Licencja
+Projekt licencjonowany na licencji MIT — plik `LICENSE` w repo.
+

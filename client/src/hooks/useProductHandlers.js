@@ -13,7 +13,9 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
 
     // Client-side uniqueness check
     try {
-      const resp = await getProductsDb();
+      const DEFAULT_PAGE = 1;
+      const DEFAULT_LIMIT = 100;
+      const resp = await getProductsDb(null, DEFAULT_PAGE, DEFAULT_LIMIT);
       const products = resp && resp.products ? resp.products : (Array.isArray(resp) ? resp : []);
       const norm = s => (s || '').toString().trim().toLowerCase();
       const exists = products.some(p => (norm(p.name) === norm(form.Nazwa) && norm(p.size) === norm(form.Rozmiar) && norm(p.type) === norm(form.Typ)));
@@ -22,18 +24,24 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
       }
     } catch (e) {
       // network or API error during pre-check: continue and let the server handle duplicates
-      // eslint-disable-next-line no-console
+       
       console.warn('Pre-submit uniqueness check failed, proceeding to submit:', e);
     }
 
     let imageUrl = null;
+    let imageThumb = null;
     try {
       if (image) {
-        imageUrl = await uploadImageForAdd(image, setForm);
+        const resp = await uploadImageForAdd(image, setForm);
+        // uploadImageForAdd now returns the full upload response object
+        if (resp) {
+          imageUrl = resp.url || null;
+          imageThumb = resp.thumbUrl || resp.url || null;
+        }
       }
     } catch (err) {
       // surface error to caller
-      // eslint-disable-next-line no-console
+       
       console.error('[useProductHandlers] upload error (add)', err);
       return { ok: false, error: err.message || String(err) };
     }
@@ -44,7 +52,7 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
       type: form.Typ,
       userId,
       imageUrl,
-      imageThumb: form.imageThumb || null,
+      imageThumb: imageThumb || form.imageThumb || null,
     };
     if (Array.isArray(stockRows) && stockRows.length > 0) {
       payload.stocks = stockRows.map(r => ({ warehouseId: r.warehouseId || null, warehouseName: r.warehouseName || '', quantity: Number(r.quantity) || 0 }));
@@ -71,8 +79,26 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
     setIfChanged('name', form.Nazwa, 'Nazwa');
     setIfChanged('size', form.Rozmiar, 'Rozmiar');
     setIfChanged('type', form.Typ, 'Typ');
-    if (typeof form.imageUrl !== 'undefined') payload.imageUrl = form.imageUrl;
-    if (typeof form.imageThumb !== 'undefined') payload.imageThumb = form.imageThumb;
+    // If the user attached a new image (local File via `image`), upload it
+    // first and include the returned urls in the payload. Otherwise, include
+    // any image fields already present on `form`.
+    try {
+      if (image && typeof image !== 'string') {
+        const resp = await uploadImageForAdd(image, setForm);
+        if (resp) {
+          payload.imageUrl = resp.url;
+          payload.imageThumb = resp.thumbUrl || resp.url;
+        }
+      } else {
+        if (typeof form.imageUrl !== 'undefined') payload.imageUrl = form.imageUrl;
+        if (typeof form.imageThumb !== 'undefined') payload.imageThumb = form.imageThumb;
+      }
+    } catch (err) {
+      // surface upload error to caller
+       
+      console.error('[useProductHandlers] upload error (edit)', err);
+      return { ok: false, error: err.message || String(err) };
+    }
 
     if (Array.isArray(stockRows)) {
       payload.stocks = stockRows.map(r => ({ warehouseId: r.warehouseId || null, warehouseName: r.warehouseName || '', quantity: Number(r.quantity) || 0 }));
@@ -83,7 +109,7 @@ export default function useProductHandlers({ form, setForm, stockRows, userId, i
     setForm({ Nazwa: '', Rozmiar: '', Typ: '' });
     setImage(null);
     return { ok: true };
-  }, [form, setForm, stockRows, setImage, onConfirmEdit]);
+  }, [form, setForm, stockRows, setImage, onConfirmEdit, image, uploadImageForAdd]);
 
   return { handleAdd, handleConfirmEdit };
 }
