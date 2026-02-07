@@ -276,9 +276,9 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
 
       // Show summary toast: include number of products and total quantity used
       if (results.failed === 0) {
-        showToast && showToast(`Oznaczono wykorzystanie ${results.success} produktów ${results.totalQuantity} sztuk`, { type: 'success' });
+        showToast && showToast(`Oznaczono pobranie ${results.success} produktów ${results.totalQuantity} sztuk`, { type: 'success' });
       } else if (results.success > 0) {
-        showToast && showToast(`Oznaczono wykorzystanie ${results.success} produktów; przeniesienie ${results.failed} produktów nie powiodło się`, { type: 'warning', timeout: 6000 });
+        showToast && showToast(`Oznaczono pobranie ${results.success} produktów; przeniesienie ${results.failed} produktów nie powiodło się`, { type: 'warning', timeout: 6000 });
         console.error('[actionView] bulk use errors', results.errors);
       } else {
         showToast && showToast(`Nie udało się przenieść produktów`, { type: 'error', timeout: 6000 });
@@ -350,7 +350,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
               aria-pressed={massActionMode === 'use'}
             >
               <VerticalAlignBottomOutlinedIcon fontSize="small" />
-              <span>Wykorzystaj</span>
+              <span>Pobierz</span>
             </button>
 
             <button
@@ -426,7 +426,7 @@ export default function ActionView({ onBack, user, setView, initialFilterWarehou
       <MassActionBar
         selectedCount={selectedIds.length}
         totalQuantity={totalSelectedQuantity}
-        confirmLabel={massActionMode === 'use' ? 'Wykorzystaj' : 'Przenieś'}
+        confirmLabel={massActionMode === 'use' ? 'Pobierz' : 'Przenieś'}
         cancelLabel="Anuluj"
         onConfirm={handleMassConfirm}
         onCancel={handleMassCancel}

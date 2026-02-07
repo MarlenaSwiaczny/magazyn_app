@@ -110,7 +110,7 @@ export default function HistoryList({ productId, token = null }) {
                       case 'add': return 'dodano';
                       case 'remove': return 'usunięto';
                       case 'import': return 'zaimportowano';
-                      case 'use': return 'wykorzystano';
+                      case 'use': return 'pobrano';
                       case 'transfer-add': return 'przeniesiono do';
                       case 'transfer-remove': return 'przeniesiono z';
                       case 'set': return 'zmieniono ilość';
@@ -163,7 +163,7 @@ export default function HistoryList({ productId, token = null }) {
                             case 'add': return 'dodano';
                             case 'remove': return 'usunięto';
                             case 'import': return 'zaimportowano';
-                            case 'use': return 'wykorzystano';
+                            case 'use': return 'pobrano';
                             case 'transfer-add': return 'przeniesiono do';
                             case 'transfer-remove': return 'przeniesiono z';
                             case 'transfer': return 'przeniesiono';

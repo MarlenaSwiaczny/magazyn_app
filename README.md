@@ -16,101 +16,143 @@ Lekka aplikacja magazynowa (frontend React + backend Express + Prisma). README z
 Utwórz plik `.env` w katalogu `server/` na bazie `server/.env.example` i — opcjonalnie — `.env` w katalogu głównym. Przykładowe klucze:
 
 - `DATABASE_URL` — URL do Postgres (np. `postgresql://user:pass@localhost:5432/magazyn`)
-- `JWT_SECRET` — sekret do podpisywania tokenów
-- `PORT` — port serwera (domyślnie 5000)
+# Magazyn App
 
-Pliki przykładowe: `server/.env.example`, `.env.example` (root).
+Aplikacja do zarządzania magazynami: produkty, stany, transfery i importy. Projekt w wersji developerskiej.
 
-## Uruchomienie w trybie developerskim
-1. Zainstaluj zależności root / client / server:
+⚠️ Projekt w wersji developerskiej
+
+## Demo
+
+- Brak publicznego demo — uruchom lokalnie (instrukcja w sekcji „Uruchomienie lokalne”).
+
+## Screenshots
+
+![Logowanie i rejestracja](client/public/screenshots/logowanie.png)
+
+![Akcja pobierz](client/public/screenshots/pobieranie.png)
+
+![Akcja przenieś](client/public/screenshots/przenoszenie.png)
+
+![Widok magazynów](client/public/screenshots/widok_magazynów.png)
+
+![Widok typów produktów](client/public/screenshots/widok_typów.png)
+
+![Szczegóły produktu](client/public/screenshots/szczegóły_produktu.png)
+
+![Edycja lub dodawanie produktu](client/public/screenshots/edycja.png)
+
+![Import z pliku](client/public/screenshots/import_z_pliku.png)
+
+![Tryb responsywny - widok](client/public/screenshots/ekrany_mobilne.png)
+
+![Tryb responsywny - menu](client/public/screenshots/ekrany_mobilne_menu.png)
+
+
+## Tech Stack
+
+- Frontend: React (Create React App), MUI, Tailwind CSS
+- Backend: Node.js, Express
+- ORM: Prisma
+- Database: PostgreSQL
+- Auth: JWT
+- File uploads: Multer (z obsługą miniatur przez sharp)
+
+Oddzielony frontend (w `client/`) i backend (w `server/`), API REST, baza zarządzana przez Prisma.
+
+## Funkcjonalności
+
+- Rejestracja i logowanie użytkowników
+- CRUD produktów (z obsługą obrazów)
+- Zarządzanie magazynami i przesunięciami stanów (transfery)
+- Import arkuszy Excel / CSV z tworzeniem magazynów i produktów
+- Historia zmian stanu produktów
+- Uprawnienia podstawowe (rola użytkownika)
+
+## Architektura
+
+- Oddzielny frontend i backend: `client/` (UI) i `server/` (API + logika) są oddzielone.
+- Baza: Prisma + PostgreSQL — migracje i modele w `server/prisma`.
+- Centralny klient API w `client/src/services/api.js` — ułatwia testy i zmianę endpointów.
+- UI: komponenty z prostym eventowaniem (np. `products-updated`) by unikać przestarzałych widoków.
+
+## Uruchomienie lokalne (developerskie)
+
+Wymagania:
+- Node.js (polecane LTS)
+- PostgreSQL dostępny i skonfigurowany
+
+1. Sklonuj repozytorium
 
 ```bash
-npm install
-cd client && npm install
-cd ../server && npm install
+git clone https://github.com/OWNER/REPO.git
+cd REPO
 ```
 
-2. Uruchom serwer (w katalogu `server/`):
+2. Skonfiguruj plik `.env` (możesz skopiować `.env.example`)
+
+Przykładowe zmienne (zawarte też w `.env.example`):
+
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/magazyn_dev
+JWT_SECRET=changeme
+PORT=5000
+REACT_APP_API_URL=http://localhost:5000/api
+```
+
+3. Instalacja zależności
+
+```bash
+# Serwer
+cd server
+npm install
+
+# Klient
+cd ../client
+npm install
+```
+
+4. Migracje bazy (lokalnie)
+
+W katalogu `server` uruchom (jeśli to pierwsze uruchomienie):
 
 ```bash
 cd server
-npm run dev
+npx prisma migrate dev --name init
 ```
 
-3. Uruchom klienta (w katalogu `client/`):
+5. Uruchomienie w trybie developerskim
+
+W dwóch terminalach uruchom serwer i klienta:
 
 ```bash
+# terminal 1 (serwer)
+cd server
+npm run dev
+
+# terminal 2 (klient)
 cd client
 npm start
 ```
 
-Frontend używa proxy `http://localhost:5000` do komunikacji z backendem w środowisku developerskim.
-
-## Budowanie aplikacji (production)
-
-1. Zbuduj frontend:
+6. Build produkcyjny frontendu
 
 ```bash
 cd client
 npm run build
 ```
 
-2. Pliki produkcyjne znajdą się w `client/build`. Możesz serwować je dowolnym serwerem lub skonfigurować serwer Express tak, aby serwował `client/build`.
+Serwer statycznie serwuje `client/build` jeśli istnieje.
 
-## Migracje i baza danych (Prisma)
+Jeśli coś nie działa:
+- Sprawdź `DATABASE_URL` i czy baza jest dostępna.
+- Zajrzyj do `server/logs` (jeśli istnieje) lub konsoli serwera.
 
-Instrukcje uruchamiania migracji i seedów (w katalogu `server`):
+## Status projektu
 
-- Upewnij się, że w `server/.env` jest ustawiona zmienna `DATABASE_URL`.
+🚧 Projekt w wersji developerskiej — planowane:
+- Testy jednostkowe i integracyjne (Jest + Supertest)
+-- Docker + docker-compose dla prostego lokalnego środowiska
+-- Audyt zależności i aktualizacje security
 
-- Instalacja/aktualizacja klienta Prisma:
-
-```bash
-cd server
-npx prisma generate
-```
-
-- Tryb developerski (lokalnie, tworzy migracje i stosuje je):
-
-```bash
-npx prisma migrate dev --name init
-```
-
-- Tryb produkcyjny (stosuj istniejące migracje bez ich tworzenia):
-
-```bash
-npx prisma migrate deploy
-```
-
-- Seed danych (jeśli projekt zawiera skrypt seed):
-
-```bash
-# jeśli używasz Prisma seed (zdefiniowanego w prisma/seed.js lub package.json)
-npx prisma db seed
-# lub uruchom skrypt seeda ręcznie, np.:
-node prisma/seed.js
-```
-
-Jeśli nie masz skryptu seed, możesz przygotować plik `server/prisma/seed.js` lub dodać polecenie `prisma db seed` w `package.json`.
-
-
-## Linter / formatowanie
-
-W root repo są skrypty:
-
-- `npm run lint` — uruchamia ESLint dla `server` i `client/src`
-- `npm run format` — uruchamia Prettier
-
-Uruchom w root:
-
-```bash
-npm run lint
-npm run format
-```
-
-## CI (GitHub Actions)
-W repo dodany jest prosty workflow CI (lint + client build). Zobacz `.github/workflows/ci.yml`.
-
-## Licencja
-Projekt licencjonowany na licencji MIT — plik `LICENSE` w repo.
 
